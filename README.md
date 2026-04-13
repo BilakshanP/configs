@@ -705,3 +705,5 @@ patch -R < fix.patch
 ```
 
 **Note:** Patches only work if the base file is similar. If the target file has drifted significantly, the patch may fail or apply incorrectly.
+
+## Veracrypt, Wireguard
