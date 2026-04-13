@@ -65,8 +65,8 @@ ssh -vfNL Z:localhost:Y hostname  # Run on B, M:Y -> B:Z
 
 - `-v`: verbose, `-f`: background, `-N`: no-shell
 
-- `-R`: it tells *Remote* to open the port `Y` and listen
-- `-L`: it tells *Local* to open the port `Z` and listen
+- `-R`: it tells _Remote_ to open the port `Y` and listen
+- `-L`: it tells _Local_ to open the port `Z` and listen
 
 **Note**: You can replace `localhost` with: `127.0.0.1`, `0.0.0.0` or `hostname`.
 
@@ -231,10 +231,10 @@ gpg --full-generate-key
 
 GPG automatically creates two keys:
 
-| Key | Type | Usage |
-|---|---|---|
+| Key             | Type    | Usage                                          |
+| --------------- | ------- | ---------------------------------------------- |
 | Primary (`sec`) | ed25519 | **[S]** Sign + **[C]** Certify - your identity |
-| Subkey (`ssb`) | cv25519 | **[E]** Encrypt only |
+| Subkey (`ssb`)  | cv25519 | **[E]** Encrypt only                           |
 
 **Note:** If the subkey is compromised, revoke and replace it - your identity and web of trust stay intact. If the primary key is compromised, everything is lost.
 
@@ -251,6 +251,7 @@ gpg --armor --export-secret-keys your@email.com > private_key.asc
 **Note:** Store both offline on an encrypted USB. The private key is passphrase-protected, but treat it as highly sensitive. No need to back up the public key - it is always derivable from the private key.
 
 ### Export
+
 ```sh
 # Public key (to share with others)
 gpg --armor --export your@email.com > public_key.asc
@@ -395,7 +396,7 @@ gpg --send-keys <fingerprint>
 ```
 
 ### Delete Keys
- 
+
 ```sh
 gpg --delete-keys <fingerprint>                    # public key only
 gpg --delete-secret-keys <fingerprint>             # private key only
@@ -403,26 +404,26 @@ gpg --delete-secret-and-public-keys <fingerprint>  # both at once
 ```
 
 ### One-off Verification
- 
+
 #### Method 1: Temporary Keyring (simple)
- 
+
 ```sh
 TMPGPG=$(mktemp -d)
 GNUPGHOME=$TMPGPG gpg --import public_key.asc
 GNUPGHOME=$TMPGPG gpg --verify file.sig file
 rm -rf $TMPGPG
 ```
- 
+
 Completely isolated from `~/.gnupg` — no key touches your real keyring.
- 
+
 #### Method 2: `--no-default-keyring` (broken with keyboxd)
- 
+
 ```sh
 gpg --no-default-keyring --keyring ./tmp-keyring.gpg --import key.asc
 gpg --no-default-keyring --keyring ./tmp-keyring.gpg --verify file.sig file
 rm tmp-keyring.gpg
 ```
- 
+
 **Warning:** This is silently broken if `use-keyboxd` is set in `~/.gnupg/common.conf` (the default for new GnuPG 2.4 installations). The `--keyring` option is ignored without error, and the key gets imported into your real keyring anyway. This is a [known upstream issue](https://dev.gnupg.org/T7265). Use Method 1 instead.
 
 ### Password Based Encryption
@@ -569,17 +570,19 @@ diff -ur folder1/ folder2/         # recursive folders
 ```
 
 **Why unified format?**
+
 - Shows context around changes (lines before/after)
 - Standard format for patches, git, and pull requests
 - Much more readable than default diff output
 
 **Example output:**
+
 ```diff
 --- folder1/script.sh
 +++ folder2/script.sh
 @@ -10,7 +10,7 @@
  echo "Starting..."
- 
+
  # Configuration
 -DB_HOST="localhost"
 +DB_HOST="production.example.com"
@@ -587,6 +590,7 @@ diff -ur folder1/ folder2/         # recursive folders
 ```
 
 **Key symbols:**
+
 - `---` / `+++`: file headers (original / modified)
 - `@@ -10,7 +10,7 @@`: line numbers and counts
 - ` ` (space): unchanged context lines
@@ -650,6 +654,7 @@ patch -p1 < changes.patch
 ```
 
 **`-p` flag:** strips directory levels
+
 - `-p0`: use full path as-is
 - `-p1`: strip first level (common for git patches)
 - `-p2`: strip two levels
