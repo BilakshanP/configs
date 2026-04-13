@@ -250,6 +250,34 @@ gpg --armor --export-secret-keys your@email.com > private_key.asc
 
 **Note:** Store both offline on an encrypted USB. The private key is passphrase-protected, but treat it as highly sensitive. No need to back up the public key - it is always derivable from the private key.
 
+### Export
+```sh
+# Public key (to share with others)
+gpg --armor --export your@email.com > public_key.asc
+
+# Private key (for backup/migration)
+gpg --armor --export-secret-keys your@email.com > private_key.asc
+
+# Subkeys only (safer for day-to-day use on other machines)
+gpg --armor --export-secret-subkeys your@email.com > subkeys.asc
+
+# All public keys
+gpg --armor --export > all_public_keys.asc
+```
+
+If you don't know your email, list keys first:
+
+```sh
+gpg --list-keys          # public keys
+gpg --list-secret-keys   # private keys
+```
+
+Then export by key ID or fingerprint:
+
+```sh
+gpg --armor --export <fingerprint> > public_key.asc
+```
+
 ### Publish
 
 ```sh
@@ -261,8 +289,8 @@ Then verify your email at https://keys.openpgp.org/upload so your key is searcha
 ### Restore on Another Machine
 
 ```sh
-gpg --import private_key.asc         # also derives and imports public key
-gpg --list-keys your@email.com       # verify public key is present
+gpg --import private_key.asc          # also derives and imports public key
+gpg --list-keys your@email.com        # verify public key is present
 gpg --list-secret-keys your@email.com # verify private key is present
 gpg --edit-key your@email.com
 # then: trust → 5 (ultimate) → save
@@ -365,6 +393,37 @@ gpg --refresh-keys
 gpg --import <fingerprint>.rev
 gpg --send-keys <fingerprint>
 ```
+
+### Delete Keys
+ 
+```sh
+gpg --delete-keys <fingerprint>                    # public key only
+gpg --delete-secret-keys <fingerprint>             # private key only
+gpg --delete-secret-and-public-keys <fingerprint>  # both at once
+```
+
+### One-off Verification
+ 
+#### Method 1: Temporary Keyring (simple)
+ 
+```sh
+TMPGPG=$(mktemp -d)
+GNUPGHOME=$TMPGPG gpg --import public_key.asc
+GNUPGHOME=$TMPGPG gpg --verify file.sig file
+rm -rf $TMPGPG
+```
+ 
+Completely isolated from `~/.gnupg` — no key touches your real keyring.
+ 
+#### Method 2: `--no-default-keyring` (broken with keyboxd)
+ 
+```sh
+gpg --no-default-keyring --keyring ./tmp-keyring.gpg --import key.asc
+gpg --no-default-keyring --keyring ./tmp-keyring.gpg --verify file.sig file
+rm tmp-keyring.gpg
+```
+ 
+**Warning:** This is silently broken if `use-keyboxd` is set in `~/.gnupg/common.conf` (the default for new GnuPG 2.4 installations). The `--keyring` option is ignored without error, and the key gets imported into your real keyring anyway. This is a [known upstream issue](https://dev.gnupg.org/T7265). Use Method 1 instead.
 
 ### Password Based Encryption
 
